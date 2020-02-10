@@ -96,5 +96,6 @@ func (c Conn) conn() (db Conn, err error) {
 	if err != nil {
 		log.Fatal("db error.")
 	}
-	return c, err
+	db = c
+	return
 }

@@ -10,7 +10,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	tpl := template.Must(template.ParseFiles("index.html"))
 
 	m := map[string]string{
-		"name": "せのうえ",
+		"name": "Gopaher",
 	}
 	// テンプレートを描画
 	tpl.Execute(w, m)

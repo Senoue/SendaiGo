@@ -3,10 +3,9 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"html/template"
+	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -16,8 +15,10 @@ type Conn struct {
 	Db *sql.DB
 }
 type Request struct {
-	Group   string
-	Name    string
+	Group string
+}
+
+type Responce struct {
 	Message string
 }
 
@@ -31,9 +32,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 	)
 
-	err = db.select(req)
+	req := Request{
+		Group: "1",
+	}
 
+	re, err := db.findByGroup(req.Group)
+
+	fmt.Printf("log: %v", re)
 	log.Printf("error: %v", err)
+
 	resp := Respose{
 		Status: true,
 	}
@@ -46,27 +53,37 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	route := http.NewServeMux()
 	route.HandleFunc("/", handler)
-	route.HandleFunc("/post", postHandler)
 	http.ListenAndServe(":8080", route)
 }
 
-// insert 登録
-func (db Conn) select(req Request) (err error) {
+// SELECT
+func (db Conn) findByGroup(group string) (responce []Responce, err error) {
+	mess := Responce{}
+
 	db, err = db.conn()
 	defer db.Db.Close()
-	insert, err := db.Db.Prepare("SELECT * FROM message")
+
+	rows, err := db.Db.Query("SELECT `message` FROM message WHERE `group` = ?", group)
 	if err != nil {
-		return err
+		log.Println(err)
 	}
 
-	return err
+	for rows.Next() {
+		if err = rows.Scan(&mess.Message); err != nil {
+			log.Println(err)
+		}
+		responce = append(responce, mess)
+	}
+
+	return
 }
 
-// conn コネクションプール
+// conn コネクションプールする、レシーバ
 func (c Conn) conn() (db Conn, err error) {
 	c.Db, err = sql.Open("mysql", "sendaigo:&5Y5nVDs@tcp(35.226.16.11:3306)/handson?parseTime=true&loc=Asia%2FTokyo")
 	if err != nil {
 		log.Fatal("db error.")
 	}
-	return c, err
+	db = c
+	return
 }
