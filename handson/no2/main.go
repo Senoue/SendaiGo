@@ -80,7 +80,7 @@ func (db Conn) findByGroup(group string) (responce []Responce, err error) {
 
 // conn コネクションプールする、レシーバ
 func (c Conn) conn() (db Conn, err error) {
-	c.Db, err = sql.Open("mysql", "sendaigo:&5Y5nVDs@tcp(35.226.16.11:3306)/handson?parseTime=true&loc=Asia%2FTokyo")
+	c.Db, err = sql.Open("mysql", "{id}:{pass}@tcp({host}:{port})/handson?parseTime=true&loc=Asia%2FTokyo")
 	if err != nil {
 		log.Fatal("db error.")
 	}
