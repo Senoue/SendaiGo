@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -14,37 +13,35 @@ import (
 type Conn struct {
 	Db *sql.DB
 }
+
+// グループIDを取得する
 type Request struct {
 	Group string
 }
 
+// データベースからの戻り
 type Responce struct {
-	Message string
+	Name    string `json:"name"`
+	Message string `json:"message"`
 }
 
-var db Conn
+// コネクション
+var Db Conn
+
+// エラー
 var err error
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	type (
-		Respose struct {
-			Status bool `json:"status"`
-		}
-	)
-
 	req := Request{
 		Group: "1",
 	}
 
-	re, err := db.findByGroup(req.Group)
+	resp, err := db.findByGroup(req.Group)
 
-	fmt.Printf("log: %v", re)
-	log.Printf("error: %v", err)
-
-	resp := Respose{
-		Status: true,
+	if err != nil {
+		log.Println(err)
 	}
-
+	// JSONの生成
 	res, _ := json.Marshal(resp)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(res)
@@ -56,31 +53,30 @@ func main() {
 	http.ListenAndServe(":8080", route)
 }
 
-// SELECT
+// SQL実行
 func (db Conn) findByGroup(group string) (responce []Responce, err error) {
 	mess := Responce{}
 
 	db, err = db.conn()
 	defer db.Db.Close()
 
-	rows, err := db.Db.Query("SELECT `message` FROM message WHERE `group` = ?", group)
+	rows, err := db.Db.Query("SELECT `name`, `message` FROM message WHERE `group` = ?", group)
 	if err != nil {
 		log.Println(err)
 	}
 
 	for rows.Next() {
-		if err = rows.Scan(&mess.Message); err != nil {
+		if err = rows.Scan(&mess.Name, &mess.Message); err != nil {
 			log.Println(err)
 		}
 		responce = append(responce, mess)
 	}
-
 	return
 }
 
 // conn コネクションプールする、レシーバ
 func (c Conn) conn() (db Conn, err error) {
-	c.Db, err = sql.Open("mysql", "{id}:{pass}@tcp({host}:{port})/handson?parseTime=true&loc=Asia%2FTokyo")
+	c.Db, err = sql.Open("mysql", "{ID}:{PASSWD}@tcp({HOST}:3306)/handson?parseTime=true&loc=Asia%2FTokyo")
 	if err != nil {
 		log.Fatal("db error.")
 	}
