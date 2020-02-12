@@ -26,7 +26,7 @@ type Responce struct {
 }
 
 // コネクション
-var Db Conn
+var db Conn
 
 // エラー
 var err error
