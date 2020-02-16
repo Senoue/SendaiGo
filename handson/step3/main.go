@@ -92,7 +92,7 @@ func (db Conn) insert(req Request) (err error) {
 
 // conn コネクションプール
 func (c Conn) conn() (db Conn, err error) {
-	c.Db, err = sql.Open("mysql", "{ID}:{PASSWD}@tcp({HOST}:3306)/handson?parseTime=true&loc=Asia%2FTokyo")
+	c.Db, err = sql.Open("mysql", "root:sendaigo@unix(/cloudsql/sendaigo:us-central1:sendaigo)/handson?parseTime=true&loc=Asia%2FTokyo")
 	if err != nil {
 		log.Fatal("db error.")
 	}
