@@ -14,12 +14,12 @@ type Conn struct {
 	Db *sql.DB
 }
 
-// グループIDを取得する
+// Request グループIDを取得する
 type Request struct {
 	Group string
 }
 
-// データベースからの戻り
+// Responce データベースからの戻り
 type Responce struct {
 	Name    string `json:"name"`
 	Message string `json:"message"`
@@ -65,6 +65,7 @@ func (db Conn) findByGroup(group string) (responce []Responce, err error) {
 		log.Println(err)
 	}
 
+	// ポインタに入れる
 	for rows.Next() {
 		if err = rows.Scan(&mess.Name, &mess.Message); err != nil {
 			log.Println(err)
@@ -74,9 +75,9 @@ func (db Conn) findByGroup(group string) (responce []Responce, err error) {
 	return
 }
 
-// conn コネクションプールする、レシーバ
+// conn コネクションプールするレシーバ
 func (c Conn) conn() (db Conn, err error) {
-	c.Db, err = sql.Open("mysql", "{ID}:{PASSWD}@tcp({HOST}:3306)/handson?parseTime=true&loc=Asia%2FTokyo")
+	c.Db, err = sql.Open("mysql", "sendaigo:&5Y5nVDs@tcp(35.226.16.11:3306)/handson?parseTime=true&loc=Asia%2FTokyo")
 	if err != nil {
 		log.Fatal("db error.")
 	}
