@@ -8,16 +8,23 @@
 <body>
     <div>
         <form>
+            <input type="hidden" value="1">
             <input type="hidden" name="group" value="1">
             <p>
-                {{.name}}<input type="text" name="name" size="10" />
+                名前：<input type="text" name="name" size="10" />
             </p>
             <p>
-                {{.message}}<input type="text" name="message" size="50" />
+                メッセージ：<input type="text" name="message" size="50" />
             </p>
-            <button>おくる</button>
+            <button>送信</button>
         </form>
     </div>
+    <ul>
+        {{range .}}
+            <li>{{.Name}} - {{.Message}}</li>
+        {{end}}
+    </ul>
+
     <script>
         $('button').click(function () {
             $.post('/post', $('form').serialize())

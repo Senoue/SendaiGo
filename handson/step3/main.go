@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"time"
 
+	"gopkg.in/go-playground/validator.v10"
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -15,26 +17,34 @@ import (
 type Conn struct {
 	Db *sql.DB
 }
-type Request struct {
-	Group   string
-	Name    string
-	Message string
+
+// Data やりとりするデータ
+type Data struct {
+	Group   string `label:"group"`
+	Name    string `label:"name" validate:"required"`
+	Message string `label:"message" validate:"required"`
+}
+
+// Responce データベースからの戻り
+type Responce struct {
+	Name    string `label:"name"`
+	Message string `label:"message"`
 }
 
 var db Conn
 var err error
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	group := r.FormValue("group")
 	// テンプレートをパース
 	tpl := template.Must(template.ParseFiles("form.html"))
 
-	m := map[string]string{
-		"group":   "1",
-		"name":    "名前",
-		"message": "メッセージ",
+	resp, err := db.findByGroup(group)
+	if err != nil {
+		log.Println(err)
 	}
 	// テンプレートを描画
-	tpl.Execute(w, m)
+	tpl.Execute(w, resp)
 }
 
 func postHandler(w http.ResponseWriter, r *http.Request) {
@@ -47,15 +57,22 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
 	message := r.FormValue("message")
 
-	req := Request{
+	req := Data{
 		Group:   group,
 		Name:    name,
 		Message: message,
 	}
-
+	err := validator.New().Struct(&req)
+	if err != nil {
+		log.Println("error:必須項目がないよ！")
+		return
+	}
 	err = db.insert(req)
+	if err != nil {
+		log.Println("error:データベースが更新できませんでした")
+		return
+	}
 
-	log.Printf("error: %v", err)
 	resp := Respose{
 		Status: true,
 	}
@@ -72,8 +89,30 @@ func main() {
 	http.ListenAndServe(":8080", route)
 }
 
+// SQL実行
+func (db Conn) findByGroup(group string) (responce []Responce, err error) {
+	mess := Responce{}
+
+	db, err = db.conn()
+	defer db.Db.Close()
+
+	rows, err := db.Db.Query("SELECT `name`, `message` FROM message WHERE `group` = ?", group)
+	if err != nil {
+		log.Println(err)
+	}
+
+	// ポインタに入れる
+	for rows.Next() {
+		if err = rows.Scan(&mess.Name, &mess.Message); err != nil {
+			log.Println(err)
+		}
+		responce = append(responce, mess)
+	}
+	return
+}
+
 // insert 登録
-func (db Conn) insert(req Request) (err error) {
+func (db Conn) insert(req Data) (err error) {
 	db, err = db.conn()
 	defer db.Db.Close()
 	insert, err := db.Db.Prepare("INSERT INTO message(`group`, `name`, `message`, `create_at`) VALUES(?, ?,?,?)")
@@ -92,7 +131,7 @@ func (db Conn) insert(req Request) (err error) {
 
 // conn コネクションプール
 func (c Conn) conn() (db Conn, err error) {
-	c.Db, err = sql.Open("mysql", "root:sendaigo@unix(/cloudsql/sendaigo:us-central1:sendaigo)/handson?parseTime=true&loc=Asia%2FTokyo")
+	c.Db, err = sql.Open("mysql", "sendaigo:&5Y5nVDs@tcp(35.226.16.11:3306)/handson?parseTime=true&loc=Asia%2FTokyo")
 	if err != nil {
 		log.Fatal("db error.")
 	}
