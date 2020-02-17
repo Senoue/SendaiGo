@@ -2,8 +2,9 @@
 <html lang="ja">
 <meta charset="utf-8">
 <title>チャットぽいやつ</title>
-<script src="http://code.jquery.com/jquery-2.2.4.js"></script>
+<script src="https://code.jquery.com/jquery-2.2.4.js"></script>
 </head>
+
 <body>
     <div>
         <form>
@@ -18,12 +19,13 @@
         </form>
     </div>
     <script>
-        $('button').click(function() {
+        $('button').click(function () {
             $.post('/post', $('form').serialize())
-            .done(function( data ) {
-                 console.log( data.form );
-            });
+                .done(function (data) {
+                    console.log(data.form);
+                });
         });
     </script>
 </body>
+
 </html>
