@@ -19,8 +19,8 @@ type Request struct {
 	Group string
 }
 
-// Responce データベースからの戻り
-type Responce struct {
+// Response データベースからの戻り
+type Response struct {
 	Name    string `json:"name"`
 	Message string `json:"message"`
 }
@@ -54,8 +54,8 @@ func main() {
 }
 
 // SQL実行
-func (db Conn) findByGroup(group string) (responce []Responce, err error) {
-	mess := Responce{}
+func (db Conn) findByGroup(group string) (response []Response, err error) {
+	mess := Response{}
 
 	db, err = db.conn()
 	defer db.Db.Close()
@@ -70,7 +70,7 @@ func (db Conn) findByGroup(group string) (responce []Responce, err error) {
 		if err = rows.Scan(&mess.Name, &mess.Message); err != nil {
 			log.Println(err)
 		}
-		responce = append(responce, mess)
+		response = append(response, mess)
 	}
 	return
 }
