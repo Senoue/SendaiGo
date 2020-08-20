@@ -12,7 +12,6 @@ import (
 func main() {
 	router := gin.Default()
 	m := melody.New()
-	m.Upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
 	router.GET("/", func(c *gin.Context) {
 		http.ServeFile(c.Writer, c.Request, "app/index.html")
