@@ -42,5 +42,11 @@ $docker-compose up -d
 
 コンテナに入る
 ```
-$docker exec -it chat-app sh
+$docker exec -it chat-app bash
+```
+
+実行
+```
+$cd src/chat
+$go run app/main.go
 ```
