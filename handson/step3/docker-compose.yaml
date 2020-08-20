@@ -1,9 +1,23 @@
-version: '3'
+version: '2'
+
 services:
-  chat:
-    build:
-        context: "../"
-        dockerfile: step3/Dockerfile
-    container_name: "chat-app"
-    ports:
-      - 8080:8080
+    chat-api:
+        image: senoue/go113:v1
+        container_name: chat-api
+        volumes:
+            - "./src:/go/src"
+        ports:
+            - "8081:8080"
+        networks:
+            chat_net:
+                ipv4_address: 172.35.0.2
+        tty: true
+    
+networks:
+  chat_net:
+    driver: bridge
+    ipam:
+     driver: default
+     config:
+       - subnet: 172.35.0.0/24
+         gateway: 172.35.0.1
