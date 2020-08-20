@@ -1,11 +1,44 @@
+# Websocket API
 
-docker exec -it 98456b871b8b sh
-wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy
-chmod +x cloud_sql_proxy
-      $($GOPATH/src/api/cloud_sql_proxy -dir=/cloudsql -instances=sendaigo:us-central1:sendaigo -credential_file=$GOPATH/src/api/sendaigo-sql.json) &
+### ローカル環境 ###
+
+* Go 13以上をインスール
+
+`go run app/router.go`
+
+### ローカルからのデプロイ ###
+
+ 1 gcloudでプロジェクト設定
+  
+`gcloud config set project プロジェクトID `
+
+ 2 クラスターに接続
+
+`gcloud container clusters get-credentials mirail --zone asia-northeast1-a`
+
+ 3 ビルドとイメージ作成
+
+`gcloud builds submit --tag=gcr.io/jcgp-develop/chat-api:v0.2`
+`gcloud builds submit --tag=gcr.io/jcgp-20181019/external-api:v1.3`
+
+ 4 デプロイ
+
+ `kubectl apply -f manifests/deployment.yaml`
+
+ 参考：
+ ・ service作成
+ `kubectl apply -f manifests/service.yaml`
+
+     
 
 
-      docker build -t gcr.io/sendaigo/goapp:6 -f step3/Dockerfile .
+### Contribution guidelines ###
 
+* Writing tests
+* Code review
+* Other guidelines
 
-      docker push gcr.io/sendaigo/goapp:5
+### Who do I talk to? ###
+
+* Repo owner or admin
+* Other community or team contact
